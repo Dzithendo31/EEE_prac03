@@ -345,20 +345,29 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
+volatile uint32_t lastButtonPressTime = 0;
+
 /* USER CODE BEGIN 4 */
 void EXTI0_1_IRQHandler(void)
 {
 	// TODO: Add code to switch LED7 delay frequency
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)){
-		if(delay_t == 500){
-			delay_t = 1000;
-		}
-		else{
-			delay_t = 500;
+
+		// Checking the time since the last button press so as to debunce
+		uint32_t currentTime = HAL_GetTick();
+    	if (currentTime - lastButtonPressTime > 200) { 
+			if(delay_t == 500){
+				delay_t = 1000;
+			}
+			else{
+				delay_t = 500;
+			}
+			
+
+			lastButtonPressTime = currentTime;
 		}
 		HAL_GPIO_EXTI_IRQHandler(Button0_Pin); // Clear interrupt flags
 	}
-  
 
 }
 
